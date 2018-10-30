@@ -1,0 +1,53 @@
+#!/bin/bash
+
+webpage_input="./input_webpages"
+webpages_queue="./script_data/webpages_queue"
+
+while IFS= read -r input_url
+do
+	# ${input_url:0:1} expands to the substring starting at position 
+	# 0 of length 1 (gives us the first character of the line)
+
+	if [ ${input_url:0:1} = "#" ]; then
+		echo "Found # so line was discarded"
+	else
+  		echo "$input_url"
+		
+		# find the webpage's url entry position in the url queue.
+		# The number indicating the position corresponds to the name
+		# of the text file inside ./webpages_data that holds the
+		# target webpage's save.
+		# If the given webpage's url is NOT included in the webpages_queue,
+		# then the initial value 0 we assign to i will remain unchanged.
+		
+		echo "eftasa1"
+		
+		i=0
+
+		while IFS= read -r queue_url
+		do
+			echo "eftasa2"
+			if [ "$input_url" == "$queue_url" ]; then
+				echo "Found the target url in the url_queue"
+				break
+			else
+				i+=1
+			fi
+		done < "$webpages_queue"
+		
+		echo "eftasa3"
+		echo $i
+		
+		if [ $i -eq 0 ]; then
+			echo "Target url was NOT found in the url_queue"
+			
+			# add the webpage's url as a new entry to the webpage_queue file.
+			echo $input_url >> $webpages_queue
+		
+			echo "$input_url INIT"
+		fi
+		
+		
+	fi
+		
+done < "$webpage_input"
