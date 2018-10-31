@@ -1,89 +1,116 @@
 #!/bin/bash
 
-webpage_input="./input_webpages"
-webpages_queue="./script_data/webpages_queue"
+webpage_input_dir="./input_webpages"
+webpages_queue_dir="./script_data/webpages_queue"
+
+# Load all the webpage entries from the webpages_input file to an array
+webpages_input_array=()
 
 while IFS= read -r input_url
-do
+do	
 	# ${input_url:0:1} expands to the substring starting at position 
 	# 0 of length 1 (gives us the first character of the line)
-
 	if [ ${input_url:0:1} = "#" ]; then
 		echo "Found # so line was discarded"
 	else
-		
-		# find the webpage's url entry position in the url queue.
-		# The number indicating the position corresponds to the name
-		# of the text file inside ./webpages_data that holds the
-		# target webpage's save.
-		# If the given webpage's url is NOT included in the webpages_queue,
-		# then the initial value 0 we assign to i will remain unchanged.
-		
-		i=0
-		found_url=0
+		webpages_input_array+=("$input_url")
+	fi
+	
+done < $webpage_input_dir
 
-		while IFS= read -r queue_entry
-		do
-		
-		
-			# get the webpage url and the md5sum seperately
-			
-			#while IFS=' ' read -r entry_data
-			#do
-			#	echo "mpika1"
-			#	queue_url=${entry_data[0]}
-			#	url_md5sum=${entry_data[1]}
+# Load all the webpage entries from the webpages_queue file to an array
+webpages_queue_array=()
 
-			#done <<< $queue_entry
-			
-			entry_data=($queue_entry)
-			queue_url=${entry_data[0]}
-			url_md5sum=${entry_data[1]}
-			
-			#echo "DEBUG ---------------------"
-			#echo $queue_url
-			#echo $url_md5sum
-			#echo "---------------------------"
+while IFS= read -r file_entry
+do
+	webpages_queue_array+=("$file_entry")
+	
+done < $webpages_queue_dir
+
+
+
+# Iterate through all the webpage entries of the webpages_input_array,
+# checking the webpages one by one
+
+#echo "DEBUG --------------------"
+#echo ${webpages_input_array[0]}
+#echo ${webpages_input_array[1]}
+#echo ${webpages_input_array[2]}
+#echo "--------------------------"
+
+for input_url in "${webpages_input_array[@]}"
+do
+	
+	# Check whether the given url already exists in the webpages_queue_array
+	found_url=0
+	
+	for queue_entry in "${webpages_queue_array[@]}"
+	do
+		# get the webpage url and the md5sum seperately
+		entry_data=($queue_entry)
+		queue_url=${entry_data[0]}
+		url_md5sum=${entry_data[1]}
 		
-			if [ "$input_url" = "$queue_url" ]; then
-				echo "Found the target url in the url_queue"
-				found_url=1
-				
-				# *** Chech the webpage for changes ***
-				# Download the currect webpage's md5sum and compare it 
-				# to the stored md5sum for this webpage.
-				current_md5sum=($(wget -q -O - $input_url | md5sum))
-				
-				if [ $url_md5sum != $current_md5sum ]; then
-					# The webpage has changed
-					echo "Detected changes in the given webpage"
-					echo $queue_url
-				fi
-				#break
-			else
-				i+=1
+		if [ "$input_url" = "$queue_url" ]; then
+			
+			echo "Found the target url in the url_queue"
+			found_url=1
+
+			# *** Chech the webpage for changes ***
+			# Download the currect webpage's md5sum and compare it 
+			# to the stored md5sum for this webpage.
+			current_md5sum=($(wget -q -O - $input_url | md5sum))
+
+			if [ "$url_md5sum" != "$current_md5sum" ]; then
+				# The webpage has changed
+				echo "Detected changes in the given webpage"
+				echo $queue_url
 			fi
-		done < "$webpages_queue"
-		
-		if [ $found_url = 0 ]; then
-			echo "Target url was NOT found in the url_queue"
-			
-			# generate the webpage's md5sum
-			url_md5sum=($(wget -q -O - $input_url | md5sum))
-			
-			# add the webpage's url and md5sum as a new entry to the webpage_queue file.
-			# NOTE: 
-			# If you use only a single more than symbol >, it will delete the file and write ONLY what you asked it to. 
-			# a double >> adds it onto the end without deleting anything.
-			
-			#echo $input_url $url_md5sum >> $webpages_queue
-			
-			echo "$input_url $url_md5sum" &>> $webpages_queue
-			# echo "hello" >> $webpages_queue
-		
-			echo "$input_url INIT"
+				
 		fi
 		
+	done
+	
+	if [ $found_url = 0 ]; then
+		echo "Target url was NOT found in the url_queue"
+
+		# generate the webpage's md5sum
+		url_md5sum=($(wget -q -O - $input_url | md5sum))
+
+		# add the webpage's url and md5sum as a new entry to the webpages_queue_array
+		webpages_queue_array+=("$input_url $url_md5sum")
+
+		echo "$input_url INIT"
 	fi
-		
-done < "$webpage_input"
+	
+done
+
+# Empty the webpages_queue file
+> $webpages_queue_dir
+
+# Save the current webpages_queue_array state to the webpages_queue file
+for queue_entry in "${webpages_queue_array[@]}"
+do
+	#echo "mpika3-------------------"
+	#echo $queue_entry
+	#echo "-------------------------"
+	echo $queue_entry >> $webpages_queue_dir
+	#echo "" >> $webpages_queue_dir
+
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
