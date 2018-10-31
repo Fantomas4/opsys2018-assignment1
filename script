@@ -22,12 +22,44 @@ do
 		i=0
 		found_url=0
 
-		while IFS= read -r queue_url
+		while IFS= read -r queue_entry
 		do
-			if [ "$input_url" == "$queue_url" ]; then
+		
+		
+			# get the webpage url and the md5sum seperately
+			
+			#while IFS=' ' read -r entry_data
+			#do
+			#	echo "mpika1"
+			#	queue_url=${entry_data[0]}
+			#	url_md5sum=${entry_data[1]}
+
+			#done <<< $queue_entry
+			
+			entry_data=($queue_entry)
+			queue_url=${entry_data[0]}
+			url_md5sum=${entry_data[1]}
+			
+			#echo "DEBUG ---------------------"
+			#echo $queue_url
+			#echo $url_md5sum
+			#echo "---------------------------"
+		
+			if [ "$input_url" = "$queue_url" ]; then
 				echo "Found the target url in the url_queue"
 				found_url=1
-				break
+				
+				# *** Chech the webpage for changes ***
+				# Download the currect webpage's md5sum and compare it 
+				# to the stored md5sum for this webpage.
+				current_md5sum=($(wget -q -O - $input_url | md5sum))
+				
+				if [ $url_md5sum != $current_md5sum ]; then
+					# The webpage has changed
+					echo "Detected changes in the given webpage"
+					echo $queue_url
+				fi
+				#break
 			else
 				i+=1
 			fi
@@ -36,12 +68,21 @@ do
 		if [ $found_url = 0 ]; then
 			echo "Target url was NOT found in the url_queue"
 			
-			# add the webpage's url as a new entry to the webpage_queue file.
-			echo $input_url >> $webpages_queue
+			# generate the webpage's md5sum
+			url_md5sum=($(wget -q -O - $input_url | md5sum))
+			
+			# add the webpage's url and md5sum as a new entry to the webpage_queue file.
+			# NOTE: 
+			# If you use only a single more than symbol >, it will delete the file and write ONLY what you asked it to. 
+			# a double >> adds it onto the end without deleting anything.
+			
+			#echo $input_url $url_md5sum >> $webpages_queue
+			
+			echo "$input_url $url_md5sum" &>> $webpages_queue
+			# echo "hello" >> $webpages_queue
 		
 			echo "$input_url INIT"
 		fi
-		
 		
 	fi
 		
