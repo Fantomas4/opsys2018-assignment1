@@ -59,24 +59,23 @@ do
 			echo "Found the target url in the url_queue"
 			found_url=1
 			
-			# ping the target url to check if it's reachable
-			ping -c 1 "$input_url"
-		
-			# $? gets the exit status of the last executed command/function/program
-			target_reachable=$?
+			# Check if the target url is reachable
+			# 0 stands for true, 1 for false
+			target_reachable=0
+			curl $input_url -s -f -o /dev/null || target_reachable=1
 			
 			if [ $target_reachable -eq 0 ]; then
 				# target url was found to be reachable!
 				
 				current_status="REACHABLE"
 				
-				# *** Chech the webpage for changes ***
+				# *** Check the webpage for changes ***
 				# Download the currect webpage's md5sum and compare it 
 				# to the stored md5sum for this webpage.
 				current_md5sum=($(wget -q -O - $input_url | md5sum))
 				
 				
-				if [ "$url_md5sum" != "$current_md5sum" ] || [ "$url_status" = "UNREACHABLE" && "$current_status" = "REACHABLE"]; then
+				if [ "$url_md5sum" != "$current_md5sum" ] || [ "$url_status" == "UNREACHABLE" -a "$current_status" == "REACHABLE" ]; then
 					# the webpage HAS changed
 					# the webpage's md5sum we retrieved from the file is different compared to the one we generated now, so we conclude the webpage has changed
 					# or
@@ -113,27 +112,18 @@ do
 		# Target url was NOT found in the url_queue
 		echo "Target url was NOT found in the url_queue"
 		
-		# ping the target url to check if it's reachable
-		ping -c 1 "$input_url"
-		
-		# $? gets the exit status of the last executed command/function/program
-		target_reachable=$?
+		# Check if the target url is reachable
+		# 0 stands for true, 1 for false
+		target_reachable=0
+		curl $input_url -s -f -o /dev/null || target_reachable=1
 		
 		if [ $target_reachable -eq 0 ]; then
 			# target url was found to be reachable!
 			
-			# remove the http:// or https:// from the url so that we only keep the domain, ex 
-			# "http://www.example.com/somedir/someotherdir/index.html" ---> "
-			
-			
-			# ??????????????????
-			
-			
-			
 			# generate the webpage's md5sum
 			url_md5sum=($(wget -q -O - $input_url | md5sum))
 			
-			# status indicates whether we were able to ping the webpage during our last attempt
+			# status indicates whether we were able to reach the webpage during our last attempt
 			status="REACHABLE"
 
 			# add the webpage's url and md5sum as a new entry to the final_webpages_queue_array
@@ -144,7 +134,7 @@ do
 			# target url was found to be unreachable
 			echo "$input_url FAILED"
 			
-			# status indicates whether we were able to ping the webpage during our last attempt
+			# status indicates whether we were able to reach the webpage during our last attempt
 			status="UNREACHABLE"
 			
 			url_md5sum="------------------"

@@ -1,4 +1,5 @@
-http://www.tldp.org ------------------ UNREACHABLE
-https://en.wikipedia.org/wiki/Linux ------------------ UNREACHABLE
-https://www.gnu.org/software/bash/ ------------------ UNREACHABLE
-https://www.google.com/ ------------------ UNREACHABLE
+http://www.tldp.org 0f93418289de3f00d4f17d8a21910793 REACHABLE
+https://en.wikipedia.org/wiki/Linux e0587868c3e2e0f22b1308f7f522d3e4 REACHABLE
+https://www.gnu.org/software/bash/ f7bcef8d574d3c27eb09fda147964614 REACHABLE
+https://www.google.com/ 2b89070351a167ff52f5d126f093f66c REACHABLE
+www.faadasdasdsadadas.com ------------------ UNREACHABLE
