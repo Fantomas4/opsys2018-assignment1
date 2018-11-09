@@ -152,9 +152,9 @@ done < $webpages_queue_dir
 for input_url in "${webpages_input_array[@]}"
 do
 	process_input_url &
-	echo "hi"
 	
 done
+wait
 
 # Empty the webpages_queue file
 > $webpages_queue_dir
@@ -162,7 +162,7 @@ done
 # Save the current initial_webpages_queue_array state to the webpages_queue file
 for queue_entry in "${final_webpages_queue_array[@]}"
 do
-	#echo "mpika3-------------------"
+	echo "mpika3-------------------"
 	#echo $queue_entry
 	#echo "-------------------------"
 	echo $queue_entry >> $webpages_queue_dir
