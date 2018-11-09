@@ -13,8 +13,13 @@ webpages_input_array=()
 # data of the initial entries saved in initial_webpages_queue_array.
 final_webpages_queue_array=()
 
-function process_input_url {
 
+################################# FUNCTIONS #################################
+
+function process_input_url {
+	
+	local target_url=$1
+	
 	# Check whether the given url already exists in the initial_webpages_queue_array
 	found_url=0
 	
@@ -26,7 +31,7 @@ function process_input_url {
 		url_md5sum=${entry_data[1]}
 		url_status=${entry_data[2]}
 		
-		if [ "$input_url" = "$queue_url" ]; then
+		if [ "$target_url" = "$queue_url" ]; then
 			# Found the target url in the url_queue"
 			echo "Found the target url in the url_queue"
 			found_url=1
@@ -34,7 +39,7 @@ function process_input_url {
 			# Check if the target url is reachable
 			# 0 stands for true, 1 for false
 			target_reachable=0
-			curl $input_url -s -f -o /dev/null || target_reachable=1
+			curl $target_url -s -f -o /dev/null || target_reachable=1
 			
 			if [ $target_reachable -eq 0 ]; then
 				# target url was found to be reachable!
@@ -44,7 +49,7 @@ function process_input_url {
 				# *** Check the webpage for changes ***
 				# Download the currect webpage's md5sum and compare it 
 				# to the stored md5sum for this webpage.
-				current_md5sum=($(wget -q -O - $input_url | md5sum))
+				current_md5sum=($(wget -q -O - $target_url | md5sum))
 				
 				
 				if [ "$url_md5sum" != "$current_md5sum" ] || [ "$url_status" == "UNREACHABLE" -a "$current_status" == "REACHABLE" ]; then
@@ -56,22 +61,22 @@ function process_input_url {
 					echo "Detected changes in the given webpage:"
 					echo $queue_url
 					
-					# add the changed webpage's url and md5sum as a new entry to the final_webpages_queue_array
+					# append the changed webpage's url and md5sum as a new entry to the webpages_queue_dir file
 					# (update the webpage's md5sum number)
-					final_webpages_queue_array+=("$input_url $current_md5sum $current_status")
+					echo "$target_url $current_md5sum $current_status" >> $webpages_queue_dir
 				
 				else 
-					# the webpage has not changed, so we simply add it to our final_webpages_queue_array
-					final_webpages_queue_array+=("$input_url $url_md5sum $url_status")
+					# the webpage has not changed, so we simply append it to our the webpages_queue_dir file
+					echo "$target_url $url_md5sum $url_status" >> $webpages_queue_dir
 			
 				fi
 				
 			
 			else
 				# target url was found to be unreachable
-				# add the unreachable webpage's url and (old) md5sum as a new entry to the final_webpages_queue_array
+				# append the unreachable webpage's url and (old) md5sum as a new entry to the final_webpages_queue_array
 				current_status="UNREACHABLE"
-				final_webpages_queue_array+=("$input_url $url_md5sum $current_status")
+				echo "$target_url $url_md5sum $current_status" >> $webpages_queue_dir
 				
 			fi
 
@@ -87,38 +92,41 @@ function process_input_url {
 		# Check if the target url is reachable
 		# 0 stands for true, 1 for false
 		target_reachable=0
-		curl $input_url -s -f -o /dev/null || target_reachable=1
+		curl $target_url -s -f -o /dev/null || target_reachable=1
 		
 		if [ $target_reachable -eq 0 ]; then
 			# target url was found to be reachable!
 			
 			# generate the webpage's md5sum
-			url_md5sum=($(wget -q -O - $input_url | md5sum))
+			url_md5sum=($(wget -q -O - $target_url | md5sum))
 			
 			# status indicates whether we were able to reach the webpage during our last attempt
 			status="REACHABLE"
 
-			# add the webpage's url and md5sum as a new entry to the final_webpages_queue_array
-			final_webpages_queue_array+=("$input_url $url_md5sum $status")
+			# append the webpage's url and md5sum as a new entry to the webpages_queue_dir file
+			echo "$target_url $url_md5sum $status" >> $webpages_queue_dir
 
-			echo "$input_url INIT"
+			echo "$target_url INIT"
 		else
 			# target url was found to be unreachable
-			echo "$input_url FAILED"
+			echo "$target_url FAILED"
 			
 			# status indicates whether we were able to reach the webpage during our last attempt
 			status="UNREACHABLE"
 			
 			url_md5sum="------------------"
 			
-			# add the webpage's url and (empty) md5sum as a new entry to the final_webpages_queue_array
-			final_webpages_queue_array+=("$input_url $url_md5sum $status")
+			# append the webpage's url and (empty) md5sum as a new entry to the webpages_queue_dir file
+			echo "$target_url $url_md5sum $status" >> $webpages_queue_dir
 			
 		fi
 
 	fi
 
 }
+
+
+####################### MAIN ####################### 
 
 # Load all the webpage entries from the webpages_input file to an array
 while IFS= read -r input_url
@@ -140,6 +148,9 @@ do
 	
 done < $webpages_queue_dir
 
+# Empty the webpages_queue file
+> $webpages_queue_dir
+
 # Iterate through all the webpage entries of the webpages_input_array,
 # checking the webpages one by one
 
@@ -151,24 +162,11 @@ done < $webpages_queue_dir
 
 for input_url in "${webpages_input_array[@]}"
 do
-	process_input_url &
+	process_input_url $input_url &
 	
 done
 wait
 
-# Empty the webpages_queue file
-> $webpages_queue_dir
-
-# Save the current initial_webpages_queue_array state to the webpages_queue file
-for queue_entry in "${final_webpages_queue_array[@]}"
-do
-	echo "mpika3-------------------"
-	#echo $queue_entry
-	#echo "-------------------------"
-	echo $queue_entry >> $webpages_queue_dir
-	#echo "" >> $webpages_queue_dir
-
-done
 
 
 
