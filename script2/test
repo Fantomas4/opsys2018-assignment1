@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Attempt to clone the given repo_url from github
+git clone "https://github.com/CSD-FOSS-Team/hangman.git" > /dev/null 2>&1
+
+clone_status=$?
+
+if [ $clone_status != 0 ]; then
+
+	echo "CLONE OK"
+
+else
+
+	echo "CLONE FAILED"
+
+fi

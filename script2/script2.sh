@@ -5,24 +5,24 @@ unzipped_files_dir="./unzipped_files"
 txt_files_dir_array=()
 
 # Unzip the given .tar.gz file
-#unzip $input_zip_file_dir -d $unzipped_files_dir
+unzip $input_zip_file_dir -d $unzipped_files_dir > /dev/null 2>&1
 
 # Find all .txt files and store them into an array
 mapfile -t txt_files_dir_array < <( find . -type f -name "*.txt" )
 
-echo "----------------------- DIAG START -----------------------"
-
-for txt_dir in "${txt_files_dir_array[@]}"
-do
-	#echo "mpika3-------------------"
-	#echo $queue_entry
-	#echo "-------------------------"
-	echo $txt_dir
-	#echo "" >> $webpages_queue_dir
-
-done
-
-echo "----------------------- DIAG END -----------------------"
+#echo "----------------------- DIAG START -----------------------"
+#
+#for txt_dir in "${txt_files_dir_array[@]}"
+#do
+#	#echo "mpika3-------------------"
+#	#echo $queue_entry
+#	#echo "-------------------------"
+#	echo $txt_dir
+#	#echo "" >> $webpages_queue_dir
+#
+#done
+#
+#echo "----------------------- DIAG END -----------------------"
 
 # For every .txt file directory stored in txt_files_dir_array, read the git repo url the given
 # .txt file contains
@@ -47,14 +47,30 @@ do
 			echo "Found # so line was discarded"
 		else
 			repo_url=("$txt_line")
-			echo $repo_url
+			#echo $repo_url
 			break
 		fi
 	done < "$txt_dir"
 	
+	# Attempt to clone the given repo_url from github
+	git clone $repo_url > /dev/null 2>&1
 
-	
+	clone_status=$?
+	echo $clone_status
+
+	if [ $clone_status == 0 ]; then
+
+		echo "$repo_url: Cloning OK"
+
+	else
+
+		echo "$repo_url: Cloning FAILED"
+
+	fi
 
 done
+
+# Delete the unzipped_files folder before exiting the script
+rm -rf $unzipped_files_dir
 
 
