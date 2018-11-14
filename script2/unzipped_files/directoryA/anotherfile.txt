@@ -1,2 +1,0 @@
-# Comment that must be ignored
-https://github.com/username/repo-name-3.git

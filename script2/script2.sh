@@ -2,6 +2,7 @@
 
 input_zip_file_dir="./input_file.tar.gz"
 unzipped_files_dir="./unzipped_files"
+repos_clone_dir="./assignments"
 txt_files_dir_array=()
 
 # Unzip the given .tar.gz file
@@ -52,8 +53,17 @@ do
 		fi
 	done < "$txt_dir"
 	
+	echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+	echo $repo_url
+	echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+	
+	
+	
+	# Extract the repository name from the repository url
+	repo_name="$(basename $repo_url)"
+	
 	# Attempt to clone the given repo_url from github
-	git clone $repo_url > /dev/null 2>&1
+	git clone $repo_url "$repos_clone_dir/$repo_name" > /dev/null 2>&1
 
 	clone_status=$?
 	echo $clone_status
