@@ -6,6 +6,9 @@ repos_clone_dir="./assignments"
 txt_files_dir_array=()
 repo_names_array=()
 
+# Check if the assignments directory exists. If it doesn't, create it.
+mkdir -p "$repos_clone_dir"
+
 # Unzip the given .tar.gz file
 unzip $input_zip_file_dir -d $unzipped_files_dir > /dev/null 2>&1
 
@@ -32,18 +35,17 @@ do
 			break
 		fi
 	done < "$txt_dir"
-
-	# Extract the repository name from the repository url
-	repo_name="$(basename $repo_url)"
 	
-	# Add the current repository's name to the repo_names_array
-	repo_names_array+=("$repo_name")
+	# Swith to the assignments directory
+	cd "$repos_clone_dir"
 	
 	# Attempt to clone the given repo_url from github
-	git clone $repo_url "$repos_clone_dir/$repo_name" > /dev/null 2>&1
-
+	git clone $repo_url > /dev/null 2>&1
 	clone_status=$? 
 	#echo $clone_status
+	
+	# Switch back to the script's main directory
+	cd ..
 
 	if [ $clone_status == 0 ]; then
 		
@@ -60,7 +62,14 @@ do
 
 done
 
+
+
 echo -e "\n"
+
+# Get the names of all the repositories that were successfully cloned inside the assignments folder and
+# put them inside the repo_names_array
+mapfile -t repo_names_array < <( find ./assignments -maxdepth 1 -mindepth 1 \
+    -type d -exec basename {} \; )
 
 # For every repo that was cloned, print its collective results (status)
 for repo_name in "${repo_names_array[@]}"

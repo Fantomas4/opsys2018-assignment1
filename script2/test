@@ -1,16 +1,11 @@
 #!/bin/bash
 
-# Attempt to clone the given repo_url from github
-git clone "https://github.com/CSD-FOSS-Team/hangman.git" > /dev/null 2>&1
+#echo $(find ./assignments -maxdepth 1 -mindepth 1 \
+#    -type d -exec basename {} \;)
 
-clone_status=$?
+repo_url="https://github.com/Fantomas4/garden.filebrowser.git"
 
-if [ $clone_status != 0 ]; then
+repo_name=${repo_url##*/}
+repo_name=${repo_name%.git}
 
-	echo "CLONE OK"
-
-else
-
-	echo "CLONE FAILED"
-
-fi
+echo $repo_name
