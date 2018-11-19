@@ -5,6 +5,15 @@ unzipped_files_dir="./unzipped_files"
 repos_clone_dir="./assignments"
 txt_files_dir_array=()
 repo_names_array=()
+wanted_repo_structure=()
+
+# Populate the wanted_repo_structure array with the
+# wanted directories
+wanted_repo_structure+=(".")
+wanted_repo_structure+=("./dataA.txt")
+wanted_repo_structure+=("./more")
+wanted_repo_structure+=("./more/dataB.txt")
+wanted_repo_structure+=("./more/dataC.txt")
 
 # Check if the assignments directory exists. If it doesn't, create it.
 mkdir -p "$repos_clone_dir"
@@ -71,9 +80,65 @@ echo -e "\n"
 mapfile -t repo_names_array < <( find ./assignments -maxdepth 1 -mindepth 1 \
     -type d -exec basename {} \; )
 
-# For every repo that was cloned, print its collective results (status)
+# For every repo that was cloned, check its structure and 
+# print its collective results (status)
 for repo_name in "${repo_names_array[@]}"
 do
+	
+	# Change directory to the repo's folder
+	cd "./assignments/$repo_name"
+	
+	repo_structure=($(find . -not -iwholename '*.git*'))
+	
+	# Change directory back to the project's main folder
+	cd ".."
+	cd ".."
+	
+	# Check if the current repo's structure conforms to
+	# the wanted repo structure
+	
+	correct_structure=1
+	
+	#echo "size: ${#repo_structure[@]}"
+	#echo "size: ${#wanted_repo_structure[@]}"
+	
+	if [ ${#repo_structure[@]} == ${#wanted_repo_structure[@]} ]; then
+	
+		for wanted_dir in "${wanted_repo_structure[@]}"
+		do
+			#echo "wanted_dir: $wanted_dir"
+			
+			found_wanted_dir=0
+		
+			for test_dir in "${repo_structure[@]}"
+			do
+				#echo "test_dir: $test_dir"
+				
+				if [ $test_dir == $wanted_dir ]; then
+					found_wanted_dir=1
+					break
+				fi
+				
+			done
+			
+			if [ $found_wanted_dir == 0 ]; then
+				correct_structure=0
+			fi
+			
+		done
+		
+	else
+		
+		# If the amount of directories of the repo under test is different than
+		# the amount of directories of the wanted repo structure, then the structure
+		# is NOT correct
+		correct_structure=0
+	
+	fi
+	
+	echo "DIAG: " $correct_structure
+	
+
 	echo $repo_name:
 	echo "Number of directories : "
 	echo "Number of txt files : "

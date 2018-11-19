@@ -3,9 +3,14 @@
 #echo $(find ./assignments -maxdepth 1 -mindepth 1 \
 #    -type d -exec basename {} \;)
 
-repo_url="https://github.com/Fantomas4/garden.filebrowser.git"
+#repo_url="https://github.com/Fantomas4/garden.filebrowser.git"
 
-repo_name=${repo_url##*/}
-repo_name=${repo_name%.git}
+#repo_name=${repo_url##*/}
+#repo_name=${repo_name%.git}
 
-echo $repo_name
+#echo $repo_name
+
+cd "./assignments/test_repo"
+
+
+echo $(find . -not -iwholename '*.git*')
