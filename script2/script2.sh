@@ -80,19 +80,35 @@ echo -e "\n"
 mapfile -t repo_names_array < <( find ./assignments -maxdepth 1 -mindepth 1 \
     -type d -exec basename {} \; )
 
-# For every repo that was cloned, check its structure and 
+# For every repo that was cloned, 
 # print its collective results (status)
+# and check whether its structure conforms with
+# the wanted repository structure
 for repo_name in "${repo_names_array[@]}"
 do
+	num_of_dirs=()
 	
 	# Change directory to the repo's folder
 	cd "./assignments/$repo_name"
 	
 	repo_structure=($(find . -not -iwholename '*.git*'))
 	
+	# Get the repo's collective results
+	num_of_dirs=($(find . -not -iwholename '*.git*' -not -path '.' -type d))
+	num_of_txt_files=($(find . -type f -name "*.txt"))
+	num_of_other_files=($(find . -not -iwholename '*.git*' -not -name "*.txt" -not -path '.' -not -type d))
+	
+	#echo ${num_of_other_files[@]}
+	
 	# Change directory back to the project's main folder
 	cd ".."
 	cd ".."
+
+	# Print the repo's collective results
+	echo $repo_name:
+	echo "Number of directories : ${#num_of_dirs[@]}"
+	echo "Number of txt files : ${#num_of_txt_files[@]}"
+	echo "Number of other files : ${#num_of_other_files[@]}"
 	
 	# Check if the current repo's structure conforms to
 	# the wanted repo structure
@@ -136,15 +152,17 @@ do
 	
 	fi
 	
-	echo "DIAG: " $correct_structure
+	if [ $correct_structure == 1 ]; then
+		
+		echo "Directory structure is OK."
 	
-
-	echo $repo_name:
-	echo "Number of directories : "
-	echo "Number of txt files : "
-	echo "Number of other files : "
-	echo -e "\n"
-
+	else
+		echo "Directory structure is NOT OK." >&2
+	
+	fi
+	
+	#echo -e "\n"
+	
 done
 
 # Delete the unzipped_files folder before exiting the script
