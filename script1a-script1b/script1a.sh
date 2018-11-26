@@ -1,7 +1,7 @@
 #!/bin/bash
 
 webpage_input_dir="./input_webpages"
-webpages_queue_dir="./script_data/webpages_queue"
+webpages_queue_dir="./webpages_queue"
 
 # Load all the webpage entries from the webpages_input file to an array
 webpages_input_array=()
@@ -20,6 +20,13 @@ done < $webpage_input_dir
 
 # Load all the webpage entries from the webpages_queue file to an array
 initial_webpages_queue_array=()
+
+# Check if the webpages_queue.txt file exists in the webpages_queue_dir directory.
+# If it doesn't, then create it.
+if [ ! -f "$webpages_queue_dir" ]; then
+    echo "File not found!"
+	touch webpages_queue
+fi
 
 while IFS= read -r file_entry
 do
