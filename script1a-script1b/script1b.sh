@@ -1,7 +1,7 @@
 #!/bin/bash
 
 webpage_input_dir="./input_webpages"
-webpages_queue_dir="./script_data/webpages_queue"
+webpages_queue_dir="./webpages_queue"
 
 # array that will be used to hold the initial webpage data entries, loaded from the webpages_queue file
 initial_webpages_queue_array=()
@@ -33,7 +33,7 @@ function process_input_url {
 		
 		if [ "$target_url" = "$queue_url" ]; then
 			# Found the target url in the url_queue"
-			echo "Found the target url in the url_queue"
+			#echo "Found the target url in the url_queue"
 			found_url=1
 			
 			# Check if the target url is reachable
@@ -58,7 +58,7 @@ function process_input_url {
 					# or
 					# target was saved as UNREACHABLE, but during the last check was found to be REACHABLE, so we assume the webpage has changed
 
-					echo "Detected changes in the given webpage:"
+					#echo "Detected changes in the given webpage:"
 					echo $queue_url
 					
 					# append the changed webpage's url and md5sum as a new entry to the webpages_queue_dir file
@@ -87,7 +87,7 @@ function process_input_url {
 	
 	if [ $found_url = 0 ]; then
 		# Target url was NOT found in the url_queue
-		echo "Target url was NOT found in the url_queue"
+		#echo "Target url was NOT found in the url_queue"
 		
 		# Check if the target url is reachable
 		# 0 stands for true, 1 for false
@@ -133,13 +133,18 @@ while IFS= read -r input_url
 do	
 	# ${input_url:0:1} expands to the substring starting at position 
 	# 0 of length 1 (gives us the first character of the line)
-	if [ ${input_url:0:1} = "#" ]; then
-		echo "Found # so line was discarded"
-	else
+	if [ ${input_url:0:1} != "#" ]; then
 		webpages_input_array+=("$input_url")
 	fi
 	
 done < $webpage_input_dir
+
+# Check if the webpages_queue.txt file exists in the webpages_queue_dir directory.
+# If it doesn't, then create it.
+if [ ! -f "$webpages_queue_dir" ]; then
+    #echo "File not found!"
+	touch webpages_queue
+fi
 
 # Load all the webpage entries from the webpages_queue file to an array
 while IFS= read -r file_entry
@@ -153,12 +158,6 @@ done < $webpages_queue_dir
 
 # Iterate through all the webpage entries of the webpages_input_array,
 # checking the webpages one by one
-
-#echo "DEBUG --------------------"
-#echo ${webpages_input_array[0]}
-#echo ${webpages_input_array[1]}
-#echo ${webpages_input_array[2]}
-#echo "--------------------------"
 
 for input_url in "${webpages_input_array[@]}"
 do
