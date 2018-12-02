@@ -4,8 +4,6 @@ input_zip_file_dir="./input_file.tar.gz"
 unzipped_files_dir="./unzipped_files"
 repos_clone_dir="./assignments"
 txt_files_dir_array=()
-# repo_names_array holds the names of all the repositories
-# that gave the "Cloning OK" status
 repo_names_array=()
 wanted_repo_structure=()
 
@@ -57,12 +55,6 @@ do
 		
 		# Print message to stdout
 		echo "$repo_url: Cloning OK"
-		
-		# Get the repo name from the git url, removing the .git suffix
-		# and add it to the repo_names_array
-		git_url_without_suffix="${repo_url%.*}"
-		repo_name="$(basename "${git_url_without_suffix}")"
-		repo_names_array+=($repo_name)
 
 	else
 		# Print message to stderr
@@ -74,7 +66,12 @@ done
 
 #echo -e "\n"
 
-# For every repo that had the "Cloning OK" status, 
+# Get the names of all the repositories that were successfully cloned inside the assignments folder and
+# put them inside the repo_names_array
+mapfile -t repo_names_array < <( find ./assignments -maxdepth 1 -mindepth 1 \
+    -type d -exec basename {} \; )
+
+# For every repo that was cloned, 
 # print its collective results (status)
 # and check whether its structure conforms with
 # the wanted repository structure
