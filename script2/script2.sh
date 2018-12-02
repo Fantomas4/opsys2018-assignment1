@@ -28,7 +28,6 @@ mapfile -t txt_files_dir_array < <( find ./unzipped_files -type f -name "*.txt" 
 # .txt file contains
 for txt_dir in "${txt_files_dir_array[@]}"
 do
-	#echo $txt_dir
 
 	# Find the first line in the .txt file that is NOT a comment
 	# and contains a git repo url
@@ -36,11 +35,8 @@ do
 	do	
 		# ${input_url:0:1} expands to the substring starting at position 
 		# 0 of length 1 (gives us the first character of the line)
-		if [ ${txt_line:0:1} = "#" ]; then
-			echo "Found # so line was discarded"
-		else
+		if [ "${txt_line:0:1}" != "#" ]; then
 			repo_url=("$txt_line")
-			#echo $repo_url
 			break
 		fi
 	done < "$txt_dir"
@@ -51,7 +47,6 @@ do
 	# Attempt to clone the given repo_url from github
 	git clone $repo_url > /dev/null 2>&1
 	clone_status=$? 
-	#echo $clone_status
 	
 	# Switch back to the script's main directory
 	cd ..
@@ -66,14 +61,10 @@ do
 		echo "$repo_url: Cloning FAILED" >&2
 
 	fi
-	
-	#echo -e "\n"
 
 done
 
-
-
-echo -e "\n"
+#echo -e "\n"
 
 # Get the names of all the repositories that were successfully cloned inside the assignments folder and
 # put them inside the repo_names_array
@@ -98,25 +89,20 @@ do
 	num_of_txt_files=($(find . -type f -name "*.txt"))
 	num_of_other_files=($(find . -not -iwholename '*.git*' -not -name "*.txt" -not -path '.' -not -type d))
 	
-	#echo ${num_of_other_files[@]}
-	
 	# Change directory back to the project's main folder
 	cd ".."
 	cd ".."
 
 	# Print the repo's collective results
 	echo $repo_name:
-	echo "Number of directories : ${#num_of_dirs[@]}"
-	echo "Number of txt files : ${#num_of_txt_files[@]}"
-	echo "Number of other files : ${#num_of_other_files[@]}"
+	echo "Number of directories: ${#num_of_dirs[@]}"
+	echo "Number of txt files: ${#num_of_txt_files[@]}"
+	echo "Number of other files: ${#num_of_other_files[@]}"
 	
 	# Check if the current repo's structure conforms to
 	# the wanted repo structure
 	
 	correct_structure=1
-	
-	#echo "size: ${#repo_structure[@]}"
-	#echo "size: ${#wanted_repo_structure[@]}"
 	
 	if [ ${#repo_structure[@]} == ${#wanted_repo_structure[@]} ]; then
 	
@@ -160,8 +146,6 @@ do
 		echo "Directory structure is NOT OK." >&2
 	
 	fi
-	
-	#echo -e "\n"
 	
 done
 

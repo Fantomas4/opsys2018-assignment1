@@ -133,7 +133,7 @@ while IFS= read -r input_url
 do	
 	# ${input_url:0:1} expands to the substring starting at position 
 	# 0 of length 1 (gives us the first character of the line)
-	if [ ${input_url:0:1} != "#" ]; then
+	if [ "${input_url:0:1}" != "#" ]; then
 		webpages_input_array+=("$input_url")
 	fi
 	
