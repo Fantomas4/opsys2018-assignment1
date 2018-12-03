@@ -132,7 +132,7 @@ do
 			echo "$input_url INIT"
 		else
 			# target url was found to be unreachable
-			echo "$input_url FAILED"
+			echo "$input_url FAILED" >&2
 			
 			# status indicates whether we were able to reach the webpage during our last attempt
 			status="UNREACHABLE"

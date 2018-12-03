@@ -109,7 +109,7 @@ function process_input_url {
 			echo "$target_url INIT"
 		else
 			# target url was found to be unreachable
-			echo "$target_url FAILED"
+			echo "$target_url FAILED" >&2
 			
 			# status indicates whether we were able to reach the webpage during our last attempt
 			status="UNREACHABLE"
