@@ -1,6 +1,6 @@
 #!/bin/bash
 
-webpage_input_dir="./input_webpages"
+webpage_input_dir="$1"
 webpages_queue_dir="./webpages_queue"
 
 # Load all the webpage entries from the webpages_input file to an array
