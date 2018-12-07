@@ -1,6 +1,6 @@
 #!/bin/bash
 
-input_zip_file_dir="./input_file.tar.gz"
+input_zip_file_dir="$1"
 unzipped_files_dir="./unzipped_files"
 repos_clone_dir="./assignments"
 txt_files_dir_array=()
