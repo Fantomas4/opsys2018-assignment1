@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 
 input_zip_file_dir="$1"
 unzipped_files_dir="./unzipped_files"
@@ -20,8 +20,11 @@ wanted_repo_structure+=("./more/dataC.txt")
 # Check if the assignments directory exists. If it doesn't, create it.
 mkdir -p "$repos_clone_dir"
 
-# Unzip the given .tar.gz file
-unzip $input_zip_file_dir -d $unzipped_files_dir > /dev/null 2>&1
+# Create the unzipped_files folder
+mkdir -p "$unzipped_files_dir"
+
+# Unzip the given .tar.gz file into the unzipped_files folder
+tar -xzf "$input_zip_file_dir" -C "$unzipped_files_dir" > /dev/null 2>&1
 
 # Find all .txt files in the unzipped_files folder and store them into an array
 mapfile -t txt_files_dir_array < <( find ./unzipped_files -type f -name "*.txt" )
@@ -32,15 +35,16 @@ for txt_dir in "${txt_files_dir_array[@]}"
 do
 
 	# Find the first line in the .txt file that is NOT a comment
-	# and contains a git repo url
+	# and contains an https git repo url
 	while IFS= read -r txt_line 
 	do	
-		# ${input_url:0:1} expands to the substring starting at position 
-		# 0 of length 1 (gives us the first character of the line)
-		if [ "${txt_line:0:1}" != "#" ]; then
+		
+		if [[ "$txt_line" == https* ]]; then
+
 			repo_url=("$txt_line")
 			break
 		fi
+		
 	done < "$txt_dir"
 	
 	# Swith to the assignments directory
