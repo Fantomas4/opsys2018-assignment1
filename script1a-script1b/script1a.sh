@@ -97,7 +97,9 @@ do
 			
 			else
 				# target url was found to be unreachable
+				# print the "FAILED" message for the current url and
 				# add the unreachable webpage's url and (old) md5sum as a new entry to the final_webpages_queue_array
+				echo "$input_url FAILED" >&2
 				current_status="UNREACHABLE"
 				final_webpages_queue_array+=("$input_url $url_md5sum $current_status")
 				

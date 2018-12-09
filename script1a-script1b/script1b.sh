@@ -74,8 +74,10 @@ function process_input_url {
 			
 			else
 				# target url was found to be unreachable
+				# print the "FAILED" message for the current url and
 				# append the unreachable webpage's url and (old) md5sum as a new entry to the final_webpages_queue_array
 				current_status="UNREACHABLE"
+				echo "$target_url FAILED" >&2
 				echo "$target_url $url_md5sum $current_status" >> $webpages_queue_dir
 				
 			fi
